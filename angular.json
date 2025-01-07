@@ -3,5 +3,38 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "overlay-hub": {
+      "projectType": "library",
+      "root": "projects/overlay-hub",
+      "sourceRoot": "projects/overlay-hub/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/overlay-hub/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/overlay-hub/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/overlay-hub/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/overlay-hub/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    }
   }
 }

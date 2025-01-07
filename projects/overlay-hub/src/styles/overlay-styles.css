@@ -1,0 +1,50 @@
+.popup-fade-in {
+    opacity: 0;
+    animation: popupFadeIn 0.2s forwards ease-in-out;
+  }
+  .popup-fade-out {
+    opacity: 1;
+    animation: popupFadeOut 0.2s forwards ease-in-out;
+  }
+  
+  @keyframes popupFadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes popupFadeOut {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  /* Slide In / Out */
+  .popup-slide-in {
+    transform: translateY(-10px);
+    opacity: 0;
+    animation: popupSlideIn 0.2s forwards ease-out;
+  }
+  .popup-slide-out {
+    transform: translateY(0);
+    opacity: 1;
+    animation: popupSlideOut 0.2s forwards ease-out;
+  }
+  
+  @keyframes popupSlideIn {
+    0% {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes popupSlideOut {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+  }

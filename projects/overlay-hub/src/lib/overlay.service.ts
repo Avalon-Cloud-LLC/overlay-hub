@@ -32,46 +32,83 @@ export class OverlayService {
     const container = cfg.containerEl as HTMLElement;
 
     container.style.position = 'absolute';
-    container.style.display = 'block'; // 顯示才能量測
-    container.style.visibility = 'hidden'; // 避免閃爍
+    container.style.display = 'block';
+    container.style.visibility = 'hidden';
 
     const triggerRect = trigger.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
+    const viewportRect = new DOMRect(0, 0, window.innerWidth, window.innerHeight);
 
-    let boundaryRect = new DOMRect(0, 0, window.innerWidth, window.innerHeight);
-    if (cfg.boundaryEl) {
-      boundaryRect = cfg.boundaryEl.getBoundingClientRect();
+    let boundaryRect = cfg.boundaryEl 
+      ? cfg.boundaryEl.getBoundingClientRect()
+      : viewportRect;
+
+    if (cfg.mode === 'MODAL') {
+      if (boundaryRect.width > viewportRect.width || boundaryRect.height > viewportRect.height) {
+        boundaryRect = viewportRect;
+      }
     }
 
     const offset = cfg.offset ?? 8;
     let finalTop = 0, finalLeft = 0;
+    let position = cfg.preferred;
 
-    switch (cfg.preferred) {
-      case 'top':
-        finalTop = triggerRect.top - containerRect.height - offset;
-        finalLeft = triggerRect.left + (triggerRect.width / 2) - (containerRect.width / 2);
-        break;
-      case 'bottom':
-        finalTop = triggerRect.bottom + offset;
-        finalLeft = triggerRect.left + (triggerRect.width / 2) - (containerRect.width / 2);
-        break;
-      case 'left':
-        finalLeft = triggerRect.left - containerRect.width - offset;
-        finalTop = triggerRect.top + (triggerRect.height / 2) - (containerRect.height / 2);
-        break;
-      case 'right':
-        finalLeft = triggerRect.right + offset;
-        finalTop = triggerRect.top + (triggerRect.height / 2) - (containerRect.height / 2);
-        break;
-      case 'center':
-        finalLeft = boundaryRect.left + (boundaryRect.width / 2) - (containerRect.width / 2);
-        finalTop = boundaryRect.top + (boundaryRect.height / 2) - (containerRect.height / 2);
-        break;
+    const calculatePosition = (pos: string) => {
+      switch (pos) {
+        case 'top':
+          return {
+            top: triggerRect.top - containerRect.height - offset,
+            left: triggerRect.left + (triggerRect.width / 2) - (containerRect.width / 2)
+          };
+        case 'bottom':
+          return {
+            top: triggerRect.bottom + offset,
+            left: triggerRect.left + (triggerRect.width / 2) - (containerRect.width / 2)
+          };
+        case 'left':
+          return {
+            left: triggerRect.left - containerRect.width - offset,
+            top: triggerRect.top + (triggerRect.height / 2) - (containerRect.height / 2)
+          };
+        case 'right':
+          return {
+            left: triggerRect.right + offset,
+            top: triggerRect.top + (triggerRect.height / 2) - (containerRect.height / 2)
+          };
+        case 'center':
+          return {
+            left: boundaryRect.left + (boundaryRect.width / 2) - (containerRect.width / 2),
+            top: boundaryRect.top + (boundaryRect.height / 2) - (containerRect.height / 2)
+          };
+        default:
+          return { top: 0, left: 0 };
+      }
+    };
+
+    let pos = calculatePosition(position || 'center');
+    finalTop = pos.top;
+    finalLeft = pos.left;
+
+    if (position !== 'center' && cfg.mode !== 'MODAL') {
+      if (position === 'top' && finalTop < boundaryRect.top) {
+        pos = calculatePosition('bottom');
+      } else if (position === 'bottom' && finalTop + containerRect.height > boundaryRect.bottom) {
+        pos = calculatePosition('top');
+      } else if (position === 'left' && finalLeft < boundaryRect.left) {
+        pos = calculatePosition('right');
+      } else if (position === 'right' && finalLeft + containerRect.width > boundaryRect.right) {
+        pos = calculatePosition('left');
+      }
+      finalTop = pos.top;
+      finalLeft = pos.left;
     }
 
-    // Clamp to boundary
     finalLeft = Math.max(boundaryRect.left, Math.min(finalLeft, boundaryRect.right - containerRect.width));
     finalTop = Math.max(boundaryRect.top, Math.min(finalTop, boundaryRect.bottom - containerRect.height));
+
+    if (cfg.mode === 'MODAL') {
+      container.style.position = 'fixed';
+    }
 
     container.style.left = `${finalLeft}px`;
     container.style.top = `${finalTop}px`;
